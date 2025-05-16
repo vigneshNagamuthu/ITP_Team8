@@ -1,0 +1,53 @@
+*{margin: 0; padding: 0;}
+
+main{
+    width: 1366px;
+    margin: 0% auto;
+    align-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+.login {
+    /* background-color: lightgrey;
+    color: black;
+    padding: 16px 20px;
+    margin: 8px 0;
+    
+    width: 70%; */
+    width: 30%;
+    text-align:center;
+    border-radius: 10px;
+    background-color: aqua;
+    color:black;
+    padding: 20px 0px 20px 0px;
+   
+  }
+input[type=text], input[type=password] , input[type=email]{
+    width: 200px;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+    padding: 6px;
+}
+  
+.membership  {
+      text-align: center;
+      justify-content: center;
+      margin: 0px 300px 0px 300px;
+      border-radius: 15px;
+  }
+  .login {
+    background-color: lightblue;
+    text-align: center;
+  }
+
+  .container {
+    padding: 16px;
+    background-color: transparent;
+  }
+  label{
+      display: inline-block;
+     
+  }
