@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import './css/style.css';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -7,15 +10,18 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const navigate = useNavigate(); 
+
   const handleLogin = (e) => {
     e.preventDefault();
 
     // Replace with your actual credentials
-    const validUsername = "TP-Link_598F";
-    const validPassword = "46141378";
+    const validUsername = "admin";
+    const validPassword = "11111111";
 
     if (username === validUsername && password === validPassword) {
-      setIsLoggedIn(true);
+      // setIsLoggedIn(true);
+      navigate('/main');
       setError("");
     } else {
       setError("Invalid username or password.");
