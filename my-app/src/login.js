@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './css/style.css';
 import { useNavigate } from 'react-router-dom';
-
 
 
 const Login = () => {
@@ -11,16 +10,22 @@ const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const navigate = useNavigate(); 
+ 
+  useEffect(() => {
+    localStorage.removeItem("auth");
+    window.history.pushState(null, "", "/"); // Clear browser history stack
+  }, []);
+
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // Replace with your actual credentials
     const validUsername = "admin";
     const validPassword = "11111111";
 
     if (username === validUsername && password === validPassword) {
       // setIsLoggedIn(true);
+      localStorage.setItem("auth", "true");  
       navigate('/main');
       setError("");
     } else {
