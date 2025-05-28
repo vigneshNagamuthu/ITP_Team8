@@ -1,172 +1,162 @@
 /* General Reset */
 * {
-    box-sizing: border-box;
-  }
-  
-  body {
-    margin: 0;
-    background: #FFFFFF;
-    padding: 0;
-    height: auto;
-    overflow-y: auto;
-    
-  }
-  
-  /* Dashboard Container */
-  .dashboard {
-    position: relative;
-    height: 1268px;
-    width: 1510px;
-    border: 1px solid #000;
-  }
-  
-  /* Navigation Bar */
-  .navigation-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 1510px;
-    height: 131px;
-    background: #2F4182;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 50px;
-  }
-  
-  .nav-title {
-    color: #FFFFFF;
-    font-family: 'Inter', sans-serif;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 39px;
-  }
-  
-  .nav-links {
-    display: flex;
-    gap: 50px;
-  }
-  
-  .nav-item {
-    color: #FFFFFF;
-    font-family: 'Inter', sans-serif;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 39px;
-  }
-  
-  /* Bandwidth Title */
-  .bandwidth-header {
-    position: absolute;
-    top: 159px;
-    left: 827px;
-  }
-  
-  .bandwidth-header h2 {
-    position: absolute;
-    top: 39px;
-    left: -585px;
-    font-family: 'Inter', sans-serif;
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 44px;
-    color: #000000;
-  }
-  
-  .total-bandwidth {
-    position: relative;
-    top: 59px;
-    left: 9px;
-    font-family: 'Inter', sans-serif;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 39px;
-    color: #000000;
-  }
-  
-  .bmp {
-    position: absolute;
-    top: 59px;
-    left: 166px;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 29px;
-  }
-  
-  /* Time Series Graph */
-  .time-series-graph {
-    position: absolute;
-    width: 1104px;
-    height: 292px;
-    top: 283px;
-    left: 203px;
-    background: #FFFFFF;
-    border: 1px solid #000;
-  }
-  
-  /* Title Row */
-  .row.titles {
-    position: absolute;
-    top: 616px;
-    left: 80px;
-    width: 1370px;
-    height: 92px;
-    border: 1px solid #000;
-    display: flex;
-    justify-content: space-between;
-    padding: 30px 50px;
-    font-family: 'Inter', sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 29px;
-    color: #000;
-  }
-  
-  /* Port Row 1 */
-  .row.port-row:nth-of-type(1) {
-    position: absolute;
-    top: 744px;
-    left: 80px;
-    width: 1370px;
-    height: 194px;
-    display: flex;
-    justify-content: space-between;
-    padding: 60px 50px;
-  }
-  
-  /* Port Row 2 */
-  .row.port-row:nth-of-type(2) {
-    position: absolute;
-    top: 974px;
-    left: 80px;
-    width: 1370px;
-    height: 201px;
-    display: flex;
-    justify-content: space-between;
-    padding: 83px 50px;
-    border: 1px solid #000;
-  }
-  
-  /* Port Elements */
-  .port-name, .port-time-series, .port-bpm {
-    font-family: 'Inter', sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 29px;
-    color: #000;
-  }
-  
-  /* Optional Subclasses if needed */
-  .port-name {
-    width: 200px;
-  }
-  
-  .port-time-series {
-    width: 250px;
-  }
-  
-  .port-bpm {
-    width: 150px;
-  }
+  box-sizing: border-box;
+}
 
-  
+body {
+  margin: 0;
+  background: #FFFFFF;
+  padding: 0;
+  height: auto;
+  overflow-y: auto;
+}
+
+/* Dashboard Container */
+.dashboard {
+  position: relative;
+  height: 1268px;
+  width: 1510px;
+  border: 1px solid #000;
+}
+
+/* Navigation Bar */
+.navigation-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1510px;
+  height: 131px;
+  background: #2F4182;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 50px;
+}
+
+.nav-title {
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 39px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 50px;
+}
+
+.nav-item {
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 39px;
+}
+
+/* Bandwidth Title */
+.bandwidth-header {
+  position: absolute;
+  top: 159px;
+  left: 827px;
+}
+
+.bandwidth-header h2 {
+  position: absolute;
+  top: 39px;
+  left: -585px;
+  font-family: 'Inter', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 44px;
+  color: #000000;
+}
+
+.total-bandwidth {
+  position: relative;
+  top: 30px;
+  left: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 39px;
+  color: #000000;
+}
+
+.bmp {
+  position: absolute;
+  top: 59px;
+  left: 166px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 29px;
+}
+
+/* Time Series Graph */
+.time-series-graph {
+  position: absolute;
+  width: 1104px;
+  height: 292px;
+  top: 283px;
+  left: 203px;
+  background: #FFFFFF;
+  border: 1px solid #000;
+}
+
+/* Title Row */
+.row.titles, .row.port-row {
+  position: relative;
+  margin: 625px auto 20px auto;
+  width: 1104px;
+  height: 92px;
+  border: 1px solid #000;
+  display: flex;
+  justify-content: space-around;
+  padding: 30px 50px;
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 29px;
+  color: #000;
+}
+
+.row.port-row {
+  position: relative;
+  margin:125px auto;
+  width: 1104px;
+  height: 92px;
+  display: flex;
+  justify-content: space-around;
+  padding: 30px 50px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 29px;
+  color: #000;
+  background-color: #fff;
+}
+
+/* Port Elements */
+.port-name, .port-speed {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 29px;
+  color: #000;
+}
+
+/* Optional Subclasses if needed */
+.port-name {
+  width: 200px;
+}
+
+.port-speed {
+  width: 250px;
+}
+
+.row.port-row:first-of-type {
+  background-color: yellow;
+}
+

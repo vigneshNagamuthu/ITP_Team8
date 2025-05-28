@@ -1,0 +1,96 @@
+/* General Reset */
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    background: #FFFFFF;
+    padding: 0;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  /* traffic Container */
+  .traffic {
+    position: relative;
+    height: 1268px;
+    width: 1510px;
+    border: 1px solid #000;
+  }
+  
+  /* Navigation Bar */
+  .navigation-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1510px;
+    height: 131px;
+    background: #2F4182;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+  }
+  
+  .nav-title {
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 39px;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 50px;
+  }
+  
+  .nav-item {
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 39px;
+  }
+
+  .traffic-content {
+    position: absolute;
+    top: 150px;
+    left: 125px;
+    width: calc(100% - 100px);
+  }
+  
+  /* Traffic Blocks */
+  .traffic-block {
+    width: 90%;
+    height: 48px;
+    background: #D9D9D9;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    color: #000;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Buttons Container */
+  .traffic-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 30px;
+  }
+  
+  /* Buttons Style */
+  .traffic-btn {
+    width: 105px;
+    height: 36px;
+    background: #1E268D;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+  }
