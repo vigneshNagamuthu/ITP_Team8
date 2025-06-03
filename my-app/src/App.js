@@ -6,11 +6,13 @@ import Main from "./main";
 import Traffic from "./traffic";
 import Setting from "./setting";
 import PrivateRoute from './PrivateRoute';
+import TestPage from "./testpage";
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/test" element={<TestPage />} /> 
         <Route path="/main" 
           element={
             <PrivateRoute>

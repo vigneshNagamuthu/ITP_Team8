@@ -84,6 +84,12 @@ const Login = () => {
             <button type="submit" className="login">
               Login
             </button>
+            <button
+              type="button"
+              className="login"
+              onClick={() => navigate('/test')}>
+              Test Page
+            </button>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
             {isLoggedIn && <p style={{ color: "green" }}>Login successful!</p>}
