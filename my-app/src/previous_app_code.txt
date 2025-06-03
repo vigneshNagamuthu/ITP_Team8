@@ -274,3 +274,141 @@ const Traffic = () => {
 
 };
 export default Traffic;
+
+
+TEST PAGE ********
+import React from 'react';
+import './css/main.css';
+import { useNavigate } from 'react-router-dom';
+
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    navigate("/"); // Redirect to login
+  };
+  
+  return (
+    <div className="test">
+      {/* Navigation Bar */}
+      <div className="navigation-bar">
+        <div className="nav-title">5G NETWORKING<br />WEB DASHBOARD</div>
+        <div className="nav-links">
+          <span className="nav-item" onClick={handleLogout}>LOGOUT</span>
+        </div>
+      </div>
+      <br />
+      <br />
+      <br />
+      
+      {/* Port Rows */}
+      <div className="row port-row">
+        <span>PORT NO.1</span>
+        <span>SPEED-1</span>
+      </div>
+
+      <div className="row port-row">
+        <span>PORT NO.2</span>
+        <span>SPEED-2</span>
+      </div>
+      <button>
+        Get Interface
+      </button>
+      <br />
+      <button>
+        Upload
+      </button>
+      <button>
+        Download
+      </button>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+CSS for TESTPAGE*******
+/* General Reset */
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    background: #FFFFFF;
+    padding: 0;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  /* traffic Container */
+  .test {
+    position: relative;
+    height: 1268px;
+    width: 1510px;
+    border: 1px solid #000;
+  }
+  
+  /* Navigation Bar */
+  .navigation-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1510px;
+    height: 131px;
+    background: #2F4182;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+  }
+  
+  .nav-title {
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 39px;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 50px;
+  }
+  
+  .nav-item {
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 39px;
+  }
+
+  .row.port-row {
+    position: relative;
+    margin:125px auto;
+    width: 1104px;
+    height: 92px;
+    display: flex;
+    justify-content: space-around;
+    padding: 30px 50px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 29px;
+    color: #000;
+    background-color: #fff;
+  }
+  
+  /* Port Elements */
+  .port-name, .port-speed {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 29px;
+    color: #000;
+  }
