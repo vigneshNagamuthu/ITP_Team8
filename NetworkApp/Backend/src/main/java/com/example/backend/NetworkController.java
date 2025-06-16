@@ -1,14 +1,27 @@
 package com.example.backend;
 
-import org.springframework.web.bind.annotation.*;
-import java.io.*;
-import java.util.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @CrossOrigin(origins = "*")
 public class NetworkController {
 
-    private final String IPERF3_SERVER_IP = "192.168.1.100"; // 🔁 Replace with your actual iperf3 server IP
+    // Change this to your iperf3 server IP if not running locally
+    private final String IPERF3_SERVER_IP = "127.0.0.1";
 
     @GetMapping("/get-interfaces")
     public Map<String, Object> getInterfaces() {
@@ -17,7 +30,6 @@ public class NetworkController {
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", "ifconfig | grep -Eo '^[a-zA-Z0-9]+' | grep -v lo | head -n 2");
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
             List<String> ports = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -31,57 +43,64 @@ public class NetworkController {
     }
 
     @GetMapping("/get-speed-data")
-    public Map<String, Object> getSpeedData() {
-        Map<String, Object> result = new HashMap<>();
-
-        List<String> interfaces = getAvailableInterfaces();
-
-        for (String iface : interfaces) {
-            Map<String, String> data = runIperf3Test(iface);
-            result.put(iface, data);
-        }
-
-        return result;
-    }
-
-    private List<String> getAvailableInterfaces() {
-        List<String> interfaces = new ArrayList<>();
-        try {
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", "ifconfig | grep -Eo '^[a-zA-Z0-9]+' | grep -v lo | head -n 2");
-            Process process = pb.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                interfaces.add(line.trim());
-            }
-        } catch (IOException e) {
-            interfaces.add("error: " + e.getMessage());
-        }
-        return interfaces;
-    }
-
-    private Map<String, String> runIperf3Test(String iface) {
+    public Map<String, String> getSpeedData(
+            @RequestParam String port,
+            @RequestParam String mode // "upload" or "download"
+    ) {
         Map<String, String> result = new HashMap<>();
         try {
-            String command = String.format("iperf3 -c %s -B $(ip addr show %s | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1) -J", IPERF3_SERVER_IP, iface);
+            // Get the local IP for the selected interface (port)
+            String ipCommand = String.format("ip addr show %s | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1", port);
+            Process ipProcess = new ProcessBuilder("bash", "-c", ipCommand).start();
+            BufferedReader ipReader = new BufferedReader(new InputStreamReader(ipProcess.getInputStream()));
+            String localIp = ipReader.readLine();
+            if (localIp == null || localIp.isEmpty()) {
+                result.put("output", "Could not get local IP for " + port);
+                return result;
+            }
+
+            // Build iperf3 command
+            String command = String.format(
+                "iperf3 -c %s -B %s %s -J",
+                IPERF3_SERVER_IP,
+                localIp,
+                "download".equals(mode) ? "-R" : ""
+            );
+
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
             Process process = pb.start();
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder jsonOutput = new StringBuilder();
+            StringBuilder output = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                jsonOutput.append(line).append("\n");
+                output.append(line).append("\n");
             }
-
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                result.put("output", jsonOutput.toString());
+                // Parse iperf3 JSON and extract only the main interval bitrate
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode root = mapper.readTree(output.toString());
+
+                    double bitsPerSecond = 0;
+                    if (root.has("end") && root.get("end").has("sum_sent")) {
+                        // Upload: client to server
+                        bitsPerSecond = root.get("end").get("sum_sent").get("bits_per_second").asDouble();
+                    } else if (root.has("end") && root.get("end").has("sum_received")) {
+                        // Download: server to client (reverse)
+                        bitsPerSecond = root.get("end").get("sum_received").get("bits_per_second").asDouble();
+                    }
+                    double mbps = bitsPerSecond / 1_000_000.0;
+
+                    result.put("bitrate", String.format("%.2f Mbps", mbps));
+                } catch (Exception e) {
+                    result.put("output", "Error parsing iperf3 JSON: " + e.getMessage());
+                }
             } else {
-                result.put("error", "iperf3 failed with exit code " + exitCode);
+                result.put("output", "iperf3 failed with exit code " + exitCode + "\n" + output.toString());
             }
-        } catch (IOException | InterruptedException e) {
-            result.put("error", e.getMessage());
+        } catch (Exception e) {
+            result.put("output", "Error: " + e.getMessage());
         }
         return result;
     }
