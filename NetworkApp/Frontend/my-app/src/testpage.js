@@ -1,34 +1,59 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './css/test.css';
-import { Link } from 'react-router-dom';  // Add this import
+import { Link } from 'react-router-dom';
 
 const TestPage = () => {
   const [portNames, setPortNames] = useState([]);
-  const [speedData, setSpeedData] = useState({ port1: '', port2: '' });
+  // Example: { enp0s3: { bitrate: "12.45 Mbps" }, ... }
+  const [uploadSpeeds, setUploadSpeeds] = useState({});
+  const [downloadSpeeds, setDownloadSpeeds] = useState({});
+  const [error, setError] = useState('');
+
+  const backendUrl = 'http://localhost:8080'; // Change if backend is on another machine
 
   const getInterfaces = async () => {
     try {
-      const response = await axios.get('http://YOUR_PI_IP:8080/get-interfaces');
+      setError('');
+      const response = await axios.get(`${backendUrl}/get-interfaces`);
       setPortNames(response.data.interfaces || []);
+      setUploadSpeeds({});
+      setDownloadSpeeds({});
     } catch (error) {
-      console.error('Error fetching interfaces:', error);
+      setError('Error fetching interfaces: ' + error.message);
+      setPortNames([]);
     }
   };
 
-  const getSpeedData = async () => {
+  // mode: "upload" or "download"
+  const getSpeedData = async (mode) => {
     try {
-      const [port1Res, port2Res] = await Promise.all([
-        axios.get('http://YOUR_PI_IP:8080/get-speed-data?port=eth0'),
-        axios.get('http://YOUR_PI_IP:8080/get-speed-data?port=eth1'),
-      ]);
-      setSpeedData({
-        port1: port1Res.data.output || '',
-        port2: port2Res.data.output || '',
-      });
+      setError('');
+      const speeds = {};
+      for (const port of portNames) {
+        const response = await axios.get(
+          `${backendUrl}/get-speed-data?port=${port}&mode=${mode}`
+        );
+        speeds[port] = response.data; // expects { bitrate: "XX.XX Mbps" }
+      }
+      if (mode === 'upload') {
+        setUploadSpeeds(speeds);
+      } else {
+        setDownloadSpeeds(speeds);
+      }
     } catch (error) {
-      console.error('Error fetching speed data:', error);
+      setError('Error fetching speed data: ' + error.message);
+      if (mode === 'upload') setUploadSpeeds({});
+      if (mode === 'download') setDownloadSpeeds({});
     }
+  };
+
+  const displayBitrate = (port, mode) => {
+    const speeds = mode === 'upload' ? uploadSpeeds : downloadSpeeds;
+    if (speeds[port] && speeds[port].bitrate) {
+      return speeds[port].bitrate;
+    }
+    return 'No data yet.';
   };
 
   return (
@@ -37,7 +62,7 @@ const TestPage = () => {
         <div className="nav-title">5G Dashboard</div>
         <div className="nav-links">
           <Link className="nav-item" to="/traffic">Traffic</Link>
-          <Link className="nav-item" to="/setting">Setting</Link> {/* Corrected path */}
+          <Link className="nav-item" to="/setting">Setting</Link>
         </div>
       </div>
 
@@ -48,20 +73,54 @@ const TestPage = () => {
             <div className="port-name"><strong>Port 1:</strong> {portNames[0] || 'N/A'}</div>
             <div className="port-name"><strong>Port 2:</strong> {portNames[1] || 'N/A'}</div>
           </div>
-
           <div className="button-group">
-            <button className="action-btn" onClick={getSpeedData}>Upload Speed</button>
-            <button className="action-btn" onClick={getSpeedData}>Download Speed</button>
+            <button className="action-btn" onClick={() => getSpeedData('upload')}>Upload Speed</button>
+            <button className="action-btn" onClick={() => getSpeedData('download')}>Download Speed</button>
           </div>
         </div>
-
-        <div className="row port-row" style={{ flexDirection: 'column', alignItems: 'flex-start', marginTop: '30px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Port 1 Speed Details</div>
-          <pre>{speedData.port1 || 'Click the buttons to fetch data.'}</pre>
-        </div>
-        <div className="row port-row" style={{ flexDirection: 'column', alignItems: 'flex-start', marginTop: '20px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Port 2 Speed Details</div>
-          <pre>{speedData.port2 || 'Click the buttons to fetch data.'}</pre>
+        {error && (
+          <div style={{ color: 'red', margin: '10px 0' }}>{error}</div>
+        )}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          marginTop: '30px'
+        }}>
+          {[0, 1].map(i => (
+            <React.Fragment key={i}>
+              <div className="speed-box" style={{
+                border: '1px solid #ddd',
+                borderRadius: 10,
+                padding: 16,
+                width: '45%',
+                marginBottom: 20,
+                background: '#f7f7f7'
+              }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                  {portNames[i] || `Port ${i + 1}`} Upload Speed
+                </div>
+                <pre style={{ whiteSpace: 'pre-wrap' }}>
+                  {portNames[i] ? displayBitrate(portNames[i], 'upload') : 'N/A'}
+                </pre>
+              </div>
+              <div className="speed-box" style={{
+                border: '1px solid #ddd',
+                borderRadius: 10,
+                padding: 16,
+                width: '45%',
+                marginBottom: 20,
+                background: '#f7f7f7'
+              }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                  {portNames[i] || `Port ${i + 1}`} Download Speed
+                </div>
+                <pre style={{ whiteSpace: 'pre-wrap' }}>
+                  {portNames[i] ? displayBitrate(portNames[i], 'download') : 'N/A'}
+                </pre>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </div>
     </div>
