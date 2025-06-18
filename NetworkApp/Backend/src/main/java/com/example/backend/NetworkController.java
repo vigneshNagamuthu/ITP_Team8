@@ -5,13 +5,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,8 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @CrossOrigin(origins = "*")
 public class NetworkController {
 
-    // Change this to your iperf3 server IP if not running locally
-    private final String IPERF3_SERVER_IP = "127.0.0.1";
+    private final String IPERF3_SERVER_IP = "89.187.162.1";
 
     @GetMapping("/get-interfaces")
     public Map<String, Object> getInterfaces() {
@@ -43,13 +37,9 @@ public class NetworkController {
     }
 
     @GetMapping("/get-speed-data")
-    public Map<String, String> getSpeedData(
-            @RequestParam String port,
-            @RequestParam String mode // "upload" or "download"
-    ) {
+    public Map<String, String> getSpeedData(@RequestParam String port, @RequestParam String mode) {
         Map<String, String> result = new HashMap<>();
         try {
-            // Get the local IP for the selected interface (port)
             String ipCommand = String.format("ip addr show %s | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1", port);
             Process ipProcess = new ProcessBuilder("bash", "-c", ipCommand).start();
             BufferedReader ipReader = new BufferedReader(new InputStreamReader(ipProcess.getInputStream()));
@@ -59,13 +49,8 @@ public class NetworkController {
                 return result;
             }
 
-            // Build iperf3 command
-            String command = String.format(
-                "iperf3 -c %s -B %s %s -J",
-                IPERF3_SERVER_IP,
-                localIp,
-                "download".equals(mode) ? "-R" : ""
-            );
+            String command = String.format("iperf3 -c %s -B %s %s -J",
+                    IPERF3_SERVER_IP, localIp, "download".equals(mode) ? "-R" : "");
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
             Process process = pb.start();
@@ -75,27 +60,21 @@ public class NetworkController {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
+
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                // Parse iperf3 JSON and extract only the main interval bitrate
-                try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode root = mapper.readTree(output.toString());
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(output.toString());
 
-                    double bitsPerSecond = 0;
-                    if (root.has("end") && root.get("end").has("sum_sent")) {
-                        // Upload: client to server
-                        bitsPerSecond = root.get("end").get("sum_sent").get("bits_per_second").asDouble();
-                    } else if (root.has("end") && root.get("end").has("sum_received")) {
-                        // Download: server to client (reverse)
-                        bitsPerSecond = root.get("end").get("sum_received").get("bits_per_second").asDouble();
-                    }
-                    double mbps = bitsPerSecond / 1_000_000.0;
-
-                    result.put("bitrate", String.format("%.2f Mbps", mbps));
-                } catch (Exception e) {
-                    result.put("output", "Error parsing iperf3 JSON: " + e.getMessage());
+                double bitsPerSecond = 0;
+                if (root.has("end") && root.get("end").has("sum_sent")) {
+                    bitsPerSecond = root.get("end").get("sum_sent").get("bits_per_second").asDouble();
+                } else if (root.has("end") && root.get("end").has("sum_received")) {
+                    bitsPerSecond = root.get("end").get("sum_received").get("bits_per_second").asDouble();
                 }
+
+                double mbps = bitsPerSecond / 1_000_000.0;
+                result.put("bitrate", String.format("%.2f Mbps", mbps));
             } else {
                 result.put("output", "iperf3 failed with exit code " + exitCode + "\n" + output.toString());
             }
@@ -104,4 +83,51 @@ public class NetworkController {
         }
         return result;
     }
+
+    @GetMapping("/traffic-analysis")
+public Map<String, Object> runTrafficAnalysis() {
+    Map<String, Object> result = new HashMap<>();
+    try {
+        // Get the first interface from ifconfig (excluding lo)
+        Process getInterfaceProcess = new ProcessBuilder(
+            "bash", "-c", "ifconfig | grep -Eo '^[a-zA-Z0-9]+' | grep -v lo | head -n 1"
+        ).start();
+        BufferedReader ifaceReader = new BufferedReader(new InputStreamReader(getInterfaceProcess.getInputStream()));
+        String interfaceName = ifaceReader.readLine();
+        if (interfaceName == null || interfaceName.isEmpty()) {
+            result.put("error", "No valid interface found.");
+            return result;
+        }
+
+        // Run tcpdump for 5 seconds on selected interface
+        String cmd = String.format("sudo timeout 5 tcpdump -i %s -vv -n", interfaceName);
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+        Process process = pb.start();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        List<String> destinations = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            // Extract destination IP from line if possible
+            // e.g., IP 192.168.1.5.12345 > 142.250.4.238.443:
+            if (line.contains(" > ")) {
+                String[] parts = line.split(" > ");
+                if (parts.length > 1) {
+                    String dest = parts[1].split(":")[0]; // Remove port if any
+                    dest = dest.contains(".") ? dest : null;
+                    if (dest != null && !destinations.contains(dest)) {
+                        destinations.add(dest);
+                    }
+                }
+            }
+        }
+
+        process.waitFor();
+        result.put("interface", interfaceName);
+        result.put("destinations", destinations);
+    } catch (Exception e) {
+        result.put("error", "Failed to run tcpdump: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return result;
 }

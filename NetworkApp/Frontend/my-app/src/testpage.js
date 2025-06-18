@@ -5,12 +5,12 @@ import { Link } from 'react-router-dom';
 
 const TestPage = () => {
   const [portNames, setPortNames] = useState([]);
-  // Example: { enp0s3: { bitrate: "12.45 Mbps" }, ... }
   const [uploadSpeeds, setUploadSpeeds] = useState({});
   const [downloadSpeeds, setDownloadSpeeds] = useState({});
+  const [trafficDestinations, setTrafficDestinations] = useState([]);
   const [error, setError] = useState('');
 
-  const backendUrl = 'http://localhost:8080'; // Change if backend is on another machine
+  const backendUrl = 'http://localhost:8080';
 
   const getInterfaces = async () => {
     try {
@@ -25,16 +25,13 @@ const TestPage = () => {
     }
   };
 
-  // mode: "upload" or "download"
   const getSpeedData = async (mode) => {
     try {
       setError('');
       const speeds = {};
       for (const port of portNames) {
-        const response = await axios.get(
-          `${backendUrl}/get-speed-data?port=${port}&mode=${mode}`
-        );
-        speeds[port] = response.data; // expects { bitrate: "XX.XX Mbps" }
+        const response = await axios.get(`${backendUrl}/get-speed-data?port=${port}&mode=${mode}`);
+        speeds[port] = response.data;
       }
       if (mode === 'upload') {
         setUploadSpeeds(speeds);
@@ -45,6 +42,17 @@ const TestPage = () => {
       setError('Error fetching speed data: ' + error.message);
       if (mode === 'upload') setUploadSpeeds({});
       if (mode === 'download') setDownloadSpeeds({});
+    }
+  };
+
+  const getTrafficAnalysis = async () => {
+    try {
+      setError('');
+      const response = await axios.get(`${backendUrl}/traffic-analysis`);
+      setTrafficDestinations(response.data.destinations || []);
+    } catch (error) {
+      setError('Error running traffic analysis: ' + error.message);
+      setTrafficDestinations([]);
     }
   };
 
@@ -78,15 +86,12 @@ const TestPage = () => {
             <button className="action-btn" onClick={() => getSpeedData('download')}>Download Speed</button>
           </div>
         </div>
+
         {error && (
           <div style={{ color: 'red', margin: '10px 0' }}>{error}</div>
         )}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          marginTop: '30px'
-        }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: '30px' }}>
           {[0, 1].map(i => (
             <React.Fragment key={i}>
               <div className="speed-box" style={{
@@ -121,6 +126,29 @@ const TestPage = () => {
               </div>
             </React.Fragment>
           ))}
+        </div>
+
+        {/* New Section: Traffic Analysis */}
+        <div className="traffic-analysis-section" style={{ marginTop: '30px' }}>
+          <button className="action-button" onClick={getTrafficAnalysis}>Traffic Analysis</button>
+          <div className="traffic-results" style={{
+            border: '1px solid #ccc',
+            borderRadius: 10,
+            padding: 16,
+            marginTop: 10,
+            background: '#f0f0f0'
+          }}>
+            <h4>Destination IPs Captured (5s):</h4>
+            {trafficDestinations.length > 0 ? (
+              <ul>
+                {trafficDestinations.map((dest, idx) => (
+                  <li key={idx}>{dest}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No traffic data yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
